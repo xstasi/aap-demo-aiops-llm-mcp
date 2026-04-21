@@ -1,0 +1,16 @@
+---
+description: Ansible and YAML quality standards for AAP demo artifacts (FQCN, tags, handlers, vault, collection tiers). Part of the artifact--* rule set.
+alwaysApply: true
+---
+
+# Ansible and YAML quality
+
+- **FQCN** for every module; explicit **`collections:`** on every play.
+- List **every** collection used in **`collections/requirements.yml`**, except for `ansible.builtin`.
+- **Tags** on all tasks; **handlers** for service restarts (not `command: systemctl restart` and the like).
+- **No plaintext secrets**; use **`ansible-vault`**; prefix vault vars with **`vault_`** and map to plain names for documentation (e.g. `db_password: "{{ vault_db_password }}"`).
+- Document vault usage in **`docs/setup.md`**.
+- **`playbooks/verify.yml`** (or equivalent) should validate expected end state.
+- User-editable config files use **`.example`** suffix where appropriate.
+- **Collection tiers** (when choosing collections): prefer Red Hat **certified**; use **validated** only when no certified alternative exists, add `# NOTE: validated content` and document why. Do **not** use `community.*` / `galaxy.*` unless the user explicitly accepts support implications. Use **`ansible.*`** when certified/validated do not cover the capability; confirm tier labels against Red Hat Automation Hub or **ansible-galaxy** metadata for the collection you select.
+- **Inline documentation** (mandatory): playbooks, tasks, complex conditionals/blocks/loops, and non-obvious CasC variables must follow **`artifact--code-comments.mdc`** in this same **`.cursor/rules/`** directory.

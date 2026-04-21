@@ -1,0 +1,12 @@
+---
+description: Configuration as Code standards for AAP demo artifacts. CasC is the source of truth; uses infra.aap_configuration. Part of the artifact--* rule set.
+alwaysApply: true
+---
+
+# Configuration as Code (mandatory)
+
+- **CasC is the source of truth** for AAP objects used by the demo/PoC. Do **not** treat the Controller UI as the authoritative place for durable configuration.
+- Use CasC to create at minimum the objects your scenario needs, for example: organizations, teams, users and RBAC, inventories, credentials, projects, job templates, workflow templates, execution environments, labels, EDA projects, and rulebooks (when EDA is in scope).
+- Use the **`infra.aap_configuration`** collection for applying AAP configuration from Ansible variables. Include it in **`collections/requirements.yml`** and install collections into **`collections/`** (see **`artifact--layout.mdc`**).
+- Typical entry playbooks: **`playbooks/aap_config.yml`** (apply CasC) and **`playbooks/aap_cleanup.yml`** (remove or reset, with safe confirmation patterns).
+- Split CasC data under **`group_vars/all/`** into focused files (examples: `organizations.yml`, `teams.yml`, `users.yml`, `roles.yml`, `inventories.yml`, `credentials.yml`, `projects.yml`, `job_templates.yml`, `workflow_templates.yml`, `labels.yml`, `execution_environments.yml`, `demo_variables.yml.example`). Follow variable layout patterns from **infra.aap_configuration** examples, as well as best practices from **`knowledge/best-practices/cop-good-practices/`**.

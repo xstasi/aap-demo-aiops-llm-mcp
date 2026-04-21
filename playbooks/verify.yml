@@ -1,0 +1,79 @@
+---
+# Description:
+#   Smoke test to verify that all AIOps demo AAP objects exist and are
+#   correctly configured. Run after aap_config.yml to validate the setup
+#   before running the live demo.
+#
+# Run order: run AFTER aap_config.yml, BEFORE the live demo.
+#
+# Usage:
+#   ansible-playbook -e @vault.yml playbooks/verify.yml --ask-vault-pass
+
+- name: Verify AIOps demo AAP objects exist
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  collections:
+    - ansible.builtin
+    - ansible.controller
+  tags: [verify]
+
+  tasks:
+    - name: Verify organization exists
+      ansible.controller.organization:
+        name: "{{ demo_organization_name }}"
+        state: exists
+      tags: [verify, org]
+
+    - name: Verify project exists
+      ansible.controller.project:
+        name: "{{ demo_project_name }}"
+        organization: "{{ demo_organization_name }}"
+        state: exists
+      tags: [verify, project]
+
+    - name: Verify inventory exists
+      ansible.controller.inventory:
+        name: "{{ demo_inventory_name }}"
+        organization: "{{ demo_organization_name }}"
+        state: exists
+      tags: [verify, inventory]
+
+    - name: Verify job templates exist
+      ansible.controller.job_template:
+        name: "{{ item }}"
+        organization: "{{ demo_organization_name }}"
+        state: exists
+      loop:
+        - AI Triage
+        - Restart Web Service
+        - Reclaim Disk Space
+      tags: [verify, templates]
+
+    - name: Verify machine credential exists
+      ansible.controller.credential:
+        name: "{{ machine_host_credential_name }}"
+        organization: "{{ demo_organization_name }}"
+        state: exists
+      tags: [verify, credentials]
+
+    - name: Verify controller token credential exists
+      ansible.controller.credential:
+        name: "{{ demo_controller_token_name }}"
+        organization: "{{ demo_organization_name }}"
+        state: exists
+      tags: [verify, credentials]
+
+    - name: Verify execution environment exists
+      ansible.controller.execution_environment:
+        name: AIOps Triage EE
+        state: exists
+      tags: [verify, ee]
+
+    - name: All AAP objects verified
+      ansible.builtin.debug:
+        msg: >-
+          All AIOps demo objects are present in AAP Controller.
+          Proceed with enabling the EDA rulebook activation and
+          running the demo.
+      tags: [verify]

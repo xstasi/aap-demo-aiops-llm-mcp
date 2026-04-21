@@ -1,0 +1,53 @@
+---
+description: Mandatory inline comments for AAP demo artifacts (playbooks, tasks, complex logic). Copy into .cursor/rules/ when scaffolding; use alwaysApply true when this folder is its own workspace. Part of the artifact--* rule set.
+alwaysApply: true
+---
+
+# Scope
+
+These standards apply to **every** generated **demo or PoC** under **`artifacts/aap-demo-*/`**, alongside the other **`artifact--*`** rules in this **`.cursor/rules/`** directory. **Language** for comments and task names: **`all--english-content.mdc`** here as well.
+
+# Playbooks
+
+- **File-level intent**: At the top of each playbook (after `---`), use a short YAML comment block that states **what this playbook does**, how it fits **next to other entry playbooks** (for example CasC apply vs verify vs cleanup), and any **safety** notes (destructive steps, required confirmations, typical run order).
+- **Per play**: Every play must have a clear **`name`**. Add **`#` comments** when host patterns, **`serial`**, **`strategy`**, **`delegate_to`**, or **`vars`** choices are non-obvious so a reader knows why that wiring exists.
+
+# Tasks
+
+- **Meaningful `name`**: Every task must have a **`name`** that describes the outcome and, when useful, **why** it runs—not only the module name (for example prefer *Ensure HTTP port is open for the health check* over *firewalld*).
+- **Task comments**: Add **`#` lines** immediately above (or inline beside) a task when any of the following apply: non-default module arguments and the reason; **ordering** or **dependency** on a prior task; **idempotency** caveats; **side effects** outside the managed host; workarounds for collection or platform limits.
+
+# Complex logic and decision points
+
+When the automation uses **`when`** / **`until`** and **`retries`**, **`block`** / **`rescue`** / **`always`**, **`loop`** / **`with_*`**, chains of **`set_fact`**, heavy **Jinja2** in arguments, **`command`** / **`shell`**, or other imperative escapes:
+
+- **Document the decision**: In a brief comment block (a few lines is enough), state **what problem this solves**, **why this approach** was chosen over simpler alternatives, and **what would invalidate** the assumption (upgrade paths, API changes, inventory shape).
+- Place the comment at the **start of the logical unit** (the `block`, the first task of a sequence, or the conditional branch) so reviewers see rationale before the details.
+
+# Roles
+
+- Apply the same **task** and **complex-logic** rules under **`roles/<name>/tasks/`** (and included task files). Non-obvious behavior in **`handlers/`** must also be commented. **`defaults/main.yml`** variable documentation remains as required in **`artifact--roles.mdc`**.
+
+# Configuration data (`group_vars/`, `vars/`)
+
+- For large or generated-style variable files, use **section comments** (`# --- ... ---` or equivalent) so blocks of CasC or scenario variables are scannable.
+- Comment **non-obvious keys**, magic lists, or structures that drive job templates and workflows when the name alone does not explain controller behavior.
+
+# Rulebooks (EDA)
+
+- When the artifact includes **`rulebooks/`**, comment **triggers**, **conditions**, and **actions** where the YAML is not self-explanatory.
+
+# Proportionality
+
+- Do **not** comment every trivial line. If **`name`** plus standard module usage is enough, extra comments add noise.
+- Prefer **accurate, current** comments: update or remove comments when behavior changes.
+
+# Checklist
+
+- [ ] Playbook headers explain purpose, place in the run sequence, and safety where relevant
+- [ ] Plays have clear `name` values; unusual wiring is commented
+- [ ] Every task has a descriptive `name`; non-obvious tasks have `#` rationale
+- [ ] Blocks, conditionals, loops, retries, and imperative workarounds document **decision points**
+- [ ] Roles and handlers follow the same rules; CasC/var files use section or key comments where helpful
+
+**Workbench sync**: The same body is maintained as **`artifact--code-comments.mdc`** with frontmatter `globs: artifacts/**` and `alwaysApply: false` when the whole **aap-poc-skill** workspace is open.

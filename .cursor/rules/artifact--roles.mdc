@@ -1,0 +1,17 @@
+---
+description: Standards for Ansible roles in AAP demo artifacts. Part of the artifact--* rule set.
+alwaysApply: true
+---
+
+# Roles
+
+- Create a role when logic is reused across playbooks or the task list exceeds ~20 tasks.
+- Initialize with:
+
+  `ansible-galaxy role init roles/<role-name>`
+
+- **`tasks/main.yml`** — task entry point; import sub-task files for clarity.
+- **`defaults/main.yml`** — user-overridable defaults; document every variable.
+- **`vars/main.yml`** — role-internal constants not intended to be overridden.
+- **`meta/main.yml`** — set **`galaxy_info`** and list role dependencies.
+- **No hardcoded secrets** anywhere in roles; use **`ansible-vault`** encrypted vars.

@@ -1,0 +1,10 @@
+---
+# --- AAP projects ---
+controller_projects:
+  - name: "{{ demo_project_name }}"
+    organization: "{{ demo_organization_name }}"
+    scm_type: git
+    scm_url: "{{ demo_project_scm_url }}"
+    scm_branch: "{{ demo_project_scm_branch }}"
+    scm_update_on_launch: true
+    state: present

@@ -1,0 +1,27 @@
+---
+# --- AAP inventories ---
+controller_inventories:
+  - name: "{{ demo_inventory_name }}"
+    organization: "{{ demo_organization_name }}"
+    description: Inventory for AIOps demo web server hosts
+    state: present
+
+# --- Hosts within the inventory ---
+# The web server host is added to the inventory so remediation
+# job templates can target it. Adjust ansible_host to match
+# the actual IP or FQDN of the managed host.
+controller_hosts:
+  - name: webserver1.example.com
+    inventory: "{{ demo_inventory_name }}"
+    variables:
+      ansible_host: CHANGE_ME
+      ansible_user: "{{ machine_ssh_user }}"
+    state: present
+
+# --- Groups within the inventory ---
+controller_groups:
+  - name: web_servers
+    inventory: "{{ demo_inventory_name }}"
+    hosts:
+      - webserver1.example.com
+    state: present

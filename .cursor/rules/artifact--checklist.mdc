@@ -1,0 +1,15 @@
+---
+description: Pre-handoff checklist for AAP demo artifacts. References the modular artifact--* rules. Part of the artifact--* rule set.
+alwaysApply: true
+---
+
+# Checklist before hand-off
+
+- [ ] Repository root is named **`aap-demo-<meaningful-slug>`** (or you have documented the equivalent layout for your environment)
+- [ ] CasC; **`infra.aap_configuration`**; **`aap_config.yml`** / **`aap_cleanup.yml`**; sensible **`group_vars/all/`** split — per **`artifact--casc.mdc`**
+- [ ] **`collections/requirements.yml`** and **`ansible.cfg.example`** with `collections_path` (or equivalent) for **`collections/`**; **README** documents collection install, Ansible config layout, secrets versus **`*.example`** files, and ordered **`playbooks/setup/`** naming when applicable — per **`artifact--layout.mdc`**
+- [ ] README and **`docs/`** follow **`all--english-content.mdc`**; no emoji, strong structure, cross-links, tables, ASCII diagrams as needed — per **`artifact--readme.mdc`**
+- [ ] FQCN, explicit `collections:` on plays, tags, handlers, vault, **`verify.yml`**, **`docs/setup.md`** — per **`artifact--ansible-quality.mdc`**
+- [ ] **Roles** (if any): init under **`roles/<role-name>/`**; **`tasks/main.yml`** as entry with included task files; documented **`defaults/`**; internal constants in **`vars/`**; **`meta/main.yml`** with dependencies; secrets only via vault — per **`artifact--roles.mdc`**
+- [ ] **`artifact--code-comments.mdc`** standards applied; playbooks and tasks documented per that rule
+- [ ] All **`artifact--*`** and **`all--*`** rule files present in **`.cursor/rules/`**

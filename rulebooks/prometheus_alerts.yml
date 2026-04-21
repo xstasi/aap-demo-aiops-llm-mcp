@@ -1,0 +1,38 @@
+---
+# EDA rulebook: single generic rule that forwards every firing Prometheus
+# alert to the AI Triage job template. The LLM decides which remediation
+# action to take -- no hardcoded alert-to-template mapping needed.
+
+- name: Prometheus alert ingestion for AI-driven remediation
+  hosts: all
+  sources:
+    # The alertmanager source listens for Alertmanager-compatible webhooks.
+    # Prometheus Alertmanager (or the simulate_alert.sh script) sends POST
+    # requests to this endpoint.
+    - ansible.eda.alertmanager:
+        host: 0.0.0.0
+        port: 5000
+        data_alerts_path: alerts
+        data_host_path: labels.instance
+      filters:
+        - ansible.eda.normalize_keys:
+
+  rules:
+    # Every firing alert is forwarded to the AI Triage job template.
+    # The full event payload is passed as alert_payload so the LLM
+    # can analyze the alert labels, annotations, and severity.
+    - name: Forward firing alert to AI triage
+      condition: event.status is defined and event.status == "firing"
+      action:
+        run_job_template:
+          name: AI Triage
+          organization: "{{ demo_organization_name }}"
+          job_args:
+            extra_vars:
+              alert_payload: "{{ event }}"
+
+    - name: Log resolved alerts
+      condition: event.status is defined and event.status == "resolved"
+      action:
+        debug:
+          msg: "Resolved: {{ event.labels.alertname | default('unknown') }}"

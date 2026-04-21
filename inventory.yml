@@ -1,0 +1,16 @@
+---
+# Managed hosts for the AIOps remediation demo.
+# The web_servers group contains the RHEL host(s) running httpd
+# that Prometheus monitors and that remediation playbooks target.
+all:
+  children:
+    web_servers:
+      hosts:
+        webserver1.example.com:
+          ansible_host: CHANGE_ME
+          ansible_user: "{{ machine_ssh_user }}"
+    local:
+      hosts:
+        localhost:
+          ansible_connection: local
+          ansible_python_interpreter: "{{ ansible_playbook_python }}"

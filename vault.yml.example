@@ -1,0 +1,32 @@
+---
+# Copy this file to vault.yml and encrypt with:
+#   ansible-vault encrypt vault.yml
+#
+# Then reference in playbooks with:
+#   ansible-playbook -e @vault.yml playbooks/aap_config.yml --ask-vault-pass
+
+# --- AAP Controller credentials ---
+vault_controller_username: admin
+vault_controller_password: CHANGE_ME
+
+# --- Machine credential (SSH) ---
+vault_machine_ssh_user: ansible
+vault_machine_ssh_key: |
+  -----BEGIN OPENSSH PRIVATE KEY-----
+  CHANGE_ME
+  -----END OPENSSH PRIVATE KEY-----
+
+# --- AAP MCP server bearer token ---
+vault_mcp_auth_token: CHANGE_ME
+
+# --- LLM API keys ---
+# Anthropic API key (required only for the Claude backend)
+vault_anthropic_api_key: CHANGE_ME
+
+# Ollama does not require an API key by default;
+# set this only if your endpoint requires authentication.
+vault_ollama_api_key: ""
+
+# --- EDA Controller credentials ---
+vault_eda_controller_username: admin
+vault_eda_controller_password: CHANGE_ME

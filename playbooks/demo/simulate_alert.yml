@@ -1,0 +1,68 @@
+---
+# Description:
+#   Simulate a Prometheus / Alertmanager webhook firing a ServiceDown alert
+#   against the EDA Controller. This replaces a real Prometheus setup for
+#   demo purposes.
+#
+#   Sends an Alertmanager-compatible JSON payload to the EDA webhook
+#   endpoint, which triggers the AI Triage job template.
+#
+# Run order: run AFTER aap_config.yml and EDA activation are enabled.
+#
+# Usage:
+#   ansible-playbook playbooks/demo/simulate_alert.yml \
+#     -e eda_webhook_host=eda.example.com \
+#     -e eda_webhook_port=5000
+
+- name: Simulate Prometheus ServiceDown alert to EDA
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  collections:
+    - ansible.builtin
+  tags: [demo, simulate]
+
+  vars:
+    eda_webhook_host: "{{ eda_hostname }}"
+    eda_webhook_port: 5000
+    alert_service: httpd
+    alert_target_host: webserver1.example.com
+    alert_severity: critical
+
+  tasks:
+    - name: Send Alertmanager webhook payload to EDA Controller
+      ansible.builtin.uri:
+        url: "http://{{ eda_webhook_host }}:{{ eda_webhook_port }}"
+        method: POST
+        body_format: json
+        body:
+          status: firing
+          alerts:
+            - status: firing
+              labels:
+                alertname: ServiceDown
+                instance: "{{ alert_target_host }}:9090"
+                job: node
+                service: "{{ alert_service }}"
+                severity: "{{ alert_severity }}"
+              annotations:
+                summary: >-
+                  {{ alert_service }} service is down on {{ alert_target_host }}
+                description: >-
+                  The {{ alert_service }} service has been down for more
+                  than 2 minutes.
+              startsAt: "{{ '%Y-%m-%dT%H:%M:%SZ' | strftime }}"
+              generatorURL: "http://prometheus:9090/graph"
+        status_code: [200, 202]
+        headers:
+          Content-Type: application/json
+      register: webhook_response
+      tags: [demo, webhook]
+
+    - name: Report webhook delivery status
+      ansible.builtin.debug:
+        msg: >-
+          Alert sent to EDA at http://{{ eda_webhook_host }}:{{ eda_webhook_port }}.
+          Response status: {{ webhook_response.status }}.
+          The AI Triage job template should now be running in AAP Controller.
+      tags: [demo, report]

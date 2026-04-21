@@ -1,0 +1,6 @@
+---
+# --- AAP organizations ---
+controller_organizations:
+  - name: "{{ demo_organization_name }}"
+    description: "{{ demo_organization_description }}"
+    state: present

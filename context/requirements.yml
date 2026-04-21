@@ -1,0 +1,6 @@
+---
+collections:
+  - name: ansible.controller
+  - name: ansible.posix
+
+roles: []

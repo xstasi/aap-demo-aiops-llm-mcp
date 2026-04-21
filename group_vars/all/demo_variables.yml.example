@@ -1,0 +1,66 @@
+---
+# ============================================================================
+# DEMO CONFIGURATION VARIABLES (EXAMPLE)
+# ============================================================================
+# Copy this file to demo_variables.yml and edit for your environment.
+# demo_variables.yml is gitignored so it is not overwritten on git pull.
+# ============================================================================
+
+# Set to true to hide sensitive task output; false for demo visibility
+demo_no_log: false
+
+# --- AAP Controller connection ---
+aap_hostname: CHANGE_ME
+aap_username: "{{ vault_controller_username }}"
+aap_password: "{{ vault_controller_password }}"
+aap_validate_certs: false
+
+# --- Demo object names ---
+demo_organization_name: AIOps Demo
+demo_organization_description: >-
+  Organization for AIOps LLM-driven remediation via MCP demo
+demo_project_name: AIOps LLM MCP Project
+demo_label_name: aiops-demo
+demo_inventory_name: AIOps Demo Inventory
+
+# --- Git repository configuration ---
+# Point this to the repository containing this PoC
+demo_project_scm_url: https://github.com/YOUR_USERNAME/aap-demo-aiops-llm-mcp.git
+demo_project_scm_branch: main
+
+# --- Credential names ---
+machine_host_credential_name: AIOps Machine Credential
+
+# --- AI backend selection ---
+# Name of the backend script (matches <name>_mcp_triage.py in files/)
+# Options: "ollama" or "claude"
+triage_backend: ollama
+
+# --- LLM endpoint (script-side approach -- Ollama) ---
+llm_api_url: "http://192.168.1.250:11434/v1"
+llm_model: qwen3:8b
+
+# --- Anthropic API (provider-native approach -- Claude) ---
+anthropic_api_key: "{{ vault_anthropic_api_key }}"
+
+# --- AAP MCP server ---
+mcp_server_url: "https://CHANGE_ME:8448/mcp"
+mcp_auth_token: "{{ vault_mcp_auth_token }}"
+
+# --- Custom execution environment ---
+aiops_ee_image: "registry.example.com/aiops-triage-ee:latest"
+
+# --- Machine credential ---
+machine_ssh_user: "{{ vault_machine_ssh_user }}"
+machine_ssh_key: "{{ vault_machine_ssh_key }}"
+
+# --- Event-Driven Ansible (EDA) ---
+eda_hostname: CHANGE_ME
+eda_username: "{{ vault_eda_controller_username }}"
+eda_password: "{{ vault_eda_controller_password }}"
+eda_validate_certs: false
+
+# --- EDA object names ---
+demo_eda_project_name: AIOps EDA Project
+demo_decision_environment_name: Default Decision Environment
+demo_controller_token_name: AIOps Controller Token

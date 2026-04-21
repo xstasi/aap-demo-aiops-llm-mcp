@@ -1,0 +1,12 @@
+---
+collections:
+  # NOTE: validated content -- infra.aap_configuration provides idempotent
+  # role-based CasC for AAP Controller, Hub, and EDA objects. No certified
+  # alternative covers the same breadth (79 roles).
+  - name: infra.aap_configuration
+
+  - name: ansible.controller
+  - name: ansible.eda
+  - name: ansible.posix
+
+roles: []

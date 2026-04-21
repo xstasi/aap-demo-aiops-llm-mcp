@@ -1,0 +1,29 @@
+---
+description: US English for prose and comments that are committed into this repository (README, docs, code, rules bodies). Does not govern Cursor Chat language. Copy into .cursor/rules/ when scaffolding; use alwaysApply true when this folder is its own workspace.
+alwaysApply: true
+---
+
+# Scope
+
+All work here follows the **Requirements** below. In **aap-poc-skill**, this file lives at **`.cursor/rules/all--english-content.mdc`** with `alwaysApply: true` (workbench and **`artifacts/`**). Each **`aap-demo-*`** artifact should also ship a copy under its own **`.cursor/rules/`** (`alwaysApply: true`, from **`templates/cursor-rules/`**) so the standard still applies when only that folder is opened as the workspace root.
+
+This rule governs **text that belongs in the repository** (or that you intend to commit), not the language of a normal **conversation in Cursor Chat**.
+
+# Requirements
+
+Use **US English** for repository-bound prose and explanations (the bullets below), not for ephemeral chat dialogue unless the user asks for English there too.
+
+- **`README.md`**, everything under **`docs/`**, **comments** in YAML, Ansible, and other code, **`task` and play `name`** strings, **variable titles** and human-readable descriptions in **`group_vars/`**, **`vars/`**, role **`defaults/`**, and **commit messages**.
+- When this repository includes the workbench layout: skill under **`.cursor/skills/ansible-poc/`**, knowledge in **`knowledge/`**, comments in **`scripts/`**, and **`.cursor/rules/*.mdc`** bodies you add or edit.
+
+# Out of scope
+
+- **Cursor Chat (and similar assistant UI)**: respond in the **same language the user writes in** for that thread, unless they explicitly request another language. This rule does **not** require English in chat.
+- **Personal notes or scratch text** that never ships in the repo are outside this rule (still avoid putting secrets in chat logs).
+
+# Exceptions
+
+- **Technical identifiers** and **verbatim platform strings** (module names, API fields, exact UI labels in reproductions, log lines) stay as required by the upstream system.
+- **Third-party blocks** shipped unchanged (for example license headers) are not translated for the sake of this rule.
+
+**Workbench sync**: The same body lives in **`.cursor/rules/all--english-content.mdc`** at the workbench root (`alwaysApply: true`, no `globs`).

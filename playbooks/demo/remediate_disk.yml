@@ -1,0 +1,59 @@
+---
+# Description:
+#   Reclaim disk space by cleaning temporary files and rotating logs.
+#   This template exists as a DECOY to prove the LLM reasons about
+#   alert content rather than picking a template arbitrarily.
+#   It should be selected only for DiskSpaceLow alerts.
+#
+# Run order: triggered automatically by the AI Triage job template via MCP
+#            (only when the LLM determines a disk-related alert is firing).
+#
+# Usage (manual):
+#   ansible-playbook -i inventory.yml playbooks/demo/remediate_disk.yml \
+#     -e @vault.yml --ask-vault-pass
+
+- name: Reclaim disk space on target hosts
+  hosts: web_servers
+  become: true
+  gather_facts: true
+  collections:
+    - ansible.builtin
+  tags: [remediate, disk]
+
+  tasks:
+    - name: Remove files older than 7 days from /tmp
+      ansible.builtin.find:
+        paths: /tmp
+        age: 7d
+        recurse: true
+        file_type: file
+      register: old_tmp_files
+      tags: [remediate, cleanup]
+
+    - name: Delete stale temporary files
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: absent
+      loop: "{{ old_tmp_files.files }}"
+      loop_control:
+        label: "{{ item.path }}"
+      when: old_tmp_files.files | length > 0
+      tags: [remediate, cleanup]
+
+    - name: Force log rotation to free space
+      ansible.builtin.command:
+        cmd: logrotate --force /etc/logrotate.conf
+      changed_when: true
+      tags: [remediate, logrotate]
+
+    - name: Report disk space after cleanup
+      ansible.builtin.command:
+        cmd: df -h /
+      register: disk_usage
+      changed_when: false
+      tags: [remediate, report]
+
+    - name: Display current disk usage
+      ansible.builtin.debug:
+        msg: "{{ disk_usage.stdout_lines }}"
+      tags: [remediate, report]

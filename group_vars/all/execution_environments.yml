@@ -1,0 +1,12 @@
+---
+# --- AAP execution environments ---
+controller_execution_environments:
+  # Custom EE with Python packages for AI triage scripts
+  # (LLM client SDKs, MCP SDK, httpx). Build instructions
+  # are in context/ and documented in docs/custom-ee.md.
+  - name: AIOps Triage EE
+    image: "{{ aiops_ee_image }}"
+    pull: missing
+    description: >-
+      Custom EE with Python packages for AI triage scripts
+      (LLM client SDK, MCP, httpx).

@@ -1,0 +1,106 @@
+---
+# Description:
+#   AI triage playbook -- the LLM analyzes the incoming alert and triggers
+#   the appropriate remediation job template via the AAP MCP server.
+#
+#   This playbook is launched by EDA (via the AI Triage job template) with
+#   alert_payload injected as an extra variable. It dispatches to the
+#   appropriate backend triage script based on triage_backend.
+#
+#   Each backend script produces the same JSON audit output to stdout:
+#     { "selected_template": ..., "job_id": ..., "reasoning": ..., "status": ... }
+#
+#   Exit codes: 0 = template launched, 1 = no match or error.
+#
+# Run order: called automatically by EDA; can also be invoked manually for testing.
+#
+# Usage (manual):
+#   ansible-playbook playbooks/ai_triage.yml \
+#     -e @vault.yml \
+#     -e 'alert_payload=<json>' \
+#     -e 'triage_backend=ollama' \
+#     --ask-vault-pass
+
+- name: AI triage -- LLM analyzes alert and triggers remediation via MCP
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  collections:
+    - ansible.builtin
+  tags: [triage]
+
+  tasks:
+    - name: Validate that alert_payload was provided by EDA
+      ansible.builtin.assert:
+        that:
+          - alert_payload is defined
+          - alert_payload | length > 0
+        fail_msg: >-
+          alert_payload must be provided as an extra variable.
+          This playbook is designed to be launched by EDA with
+          the Prometheus alert data.
+      tags: [triage, validate]
+
+    - name: Validate that triage_backend is set to a supported value
+      ansible.builtin.assert:
+        that:
+          - triage_backend is defined
+          - triage_backend in ['ollama', 'claude']
+        fail_msg: >-
+          triage_backend must be 'ollama' or 'claude'.
+          Current value: {{ triage_backend | default('undefined') }}
+      tags: [triage, validate]
+
+    # The triage script is baked into the custom EE at /opt/aiops/files/.
+    # Each backend produces the same JSON schema on stdout so downstream
+    # parsing is identical regardless of which LLM provider is used.
+    - name: Run triage script ({{ triage_backend }}) -- Ollama backend
+      ansible.builtin.command:
+        cmd: >-
+          python3 /opt/aiops/files/ollama_mcp_triage.py
+          --alert-json '{{ alert_payload | to_json }}'
+          --mcp-url '{{ mcp_server_url }}'
+          --mcp-token '{{ mcp_auth_token }}'
+          --llm-url '{{ llm_api_url }}'
+          --llm-model '{{ llm_model }}'
+      register: triage_result
+      changed_when: triage_result.rc == 0
+      failed_when: triage_result.rc > 1
+      when: triage_backend == 'ollama'
+      tags: [triage, ollama]
+
+    - name: Run triage script ({{ triage_backend }}) -- Claude backend
+      ansible.builtin.command:
+        cmd: >-
+          python3 /opt/aiops/files/claude_mcp_triage.py
+          --alert-json '{{ alert_payload | to_json }}'
+          --mcp-url '{{ mcp_server_url }}'
+          --mcp-token '{{ mcp_auth_token }}'
+          --api-key '{{ anthropic_api_key }}'
+      register: triage_result
+      changed_when: triage_result.rc == 0
+      failed_when: triage_result.rc > 1
+      when: triage_backend == 'claude'
+      tags: [triage, claude]
+
+    - name: Parse triage result from script stdout
+      ansible.builtin.set_fact:
+        triage_output: "{{ triage_result.stdout | from_json }}"
+      tags: [triage, parse]
+
+    - name: Display triage decision
+      ansible.builtin.debug:
+        msg: >-
+          Triage result: status={{ triage_output.status }},
+          template={{ triage_output.selected_template | default('none') }},
+          job_id={{ triage_output.job_id | default('N/A') }},
+          reasoning={{ triage_output.reasoning }}
+      tags: [triage, report]
+
+    - name: Report when no matching template was found
+      ansible.builtin.debug:
+        msg: >-
+          No remediation template matched the alert.
+          Reasoning: {{ triage_output.reasoning }}
+      when: triage_output.status == 'no_match'
+      tags: [triage, report]

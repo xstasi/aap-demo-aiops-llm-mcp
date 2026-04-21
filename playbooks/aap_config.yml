@@ -1,0 +1,29 @@
+---
+# Description:
+#   Apply AAP Configuration as Code for the AIOps demo.
+#   Creates all Controller objects (org, credentials, project, inventory,
+#   execution environment, job templates) and EDA objects (project,
+#   rulebook activation) in dependency order via infra.aap_configuration.dispatch.
+#
+# Run order: this is the FIRST playbook to execute when setting up the demo.
+# Follow with the EE build (context/build.sh) and EDA activation enablement.
+#
+# Usage:
+#   ansible-playbook -e @vault.yml playbooks/aap_config.yml --ask-vault-pass
+
+- name: Apply AAP Configuration as Code for AIOps demo
+  hosts: local
+  connection: local
+  gather_facts: false
+  collections:
+    - infra.aap_configuration
+  tags: [casc, config]
+
+  tasks:
+    # The dispatch role applies all controller_* and eda_* variables
+    # in dependency order (organizations before credentials before
+    # projects before templates, etc.).
+    - name: Apply all AAP and EDA objects via CasC dispatch
+      ansible.builtin.include_role:
+        name: infra.aap_configuration.dispatch
+      tags: [casc, dispatch]

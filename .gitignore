@@ -1,0 +1,14 @@
+# Ansible
+ansible.cfg
+collections/ansible_collections/
+*.retry
+
+# Vault and secrets
+vault.yml
+group_vars/all/demo_variables.yml
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/

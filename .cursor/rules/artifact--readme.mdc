@@ -1,0 +1,14 @@
+---
+description: README.md structure and style for AAP demo artifacts. Part of the artifact--* rule set.
+alwaysApply: true
+---
+
+# README.md
+
+- Professional, procedural tone. **No emoji** or decorative icons in the README. **Shields.io-style text badges** are fine.
+- Keep the document **linear**: avoid repeating the same commands; use **internal Markdown links** to sections (e.g. *See [Step-by-Step Deployment](#...)*).
+- For demos that need to be showcased from the AAP UI, add a **"How to run the demo"** section **near the top** (short glossary if needed, high-level phase table, then numbered steps with `bash` blocks).
+- Typical sections (adapt and renumber to fit): Introduction; Quick start checklist; Scenario overview; Architecture (ASCII diagrams in fenced blocks); Repository structure; Prerequisites (include a **Collections** table); Step-by-step deployment; Running the demo; Job templates / workflows (tables); Troubleshooting (cause/fix) and optional reset/cleanup; License; optional Contributing.
+- Use **tables** for job templates, workflows, and collections. Use **ASCII art** for architecture and flows.
+- Commands in fenced **`bash`** blocks; paths and `cd` should match the real tree, relative to the artifact root.
+- **Repository operations** belong in the README, including: **`ansible.cfg.example`** and **`collections_path`** (for example toward **`collections/`**); installing dependencies with **`ansible-galaxy collection install -r collections/requirements.yml -p collections`** (or equivalent) in prerequisites or deployment steps; copying **`vault.yml.example`** / **`demo_variables.yml.example`** versus real secrets and listing **`vault.yml`** and sensitive **`group_vars/all/demo_variables.yml`** in **`.gitignore`** when applicable; and documenting numeric prefixes under **`playbooks/setup/`** (`01_...`, `02_...`) when order matters.

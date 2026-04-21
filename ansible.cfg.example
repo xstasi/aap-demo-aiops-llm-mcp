@@ -1,0 +1,44 @@
+[defaults]
+inventory = inventory.yml
+roles_path = roles
+collections_path = collections
+interpreter_python = auto_silent
+
+# Disable host key checking for demo purposes
+host_key_checking = False
+
+# Retry files location
+retry_files_save_path = /tmp
+
+# Stdout callback plugin for better output
+stdout_callback = ansible.builtin.default
+result_format = yaml
+
+# Forks for parallel execution
+forks = 5
+
+# Timeout for connections
+timeout = 30
+
+# Deprecation warnings
+deprecation_warnings = False
+
+
+[galaxy]
+# Server list for collection installation
+# Priority: certified collections first, then validated, then community
+server_list = automation_hub_certified, automation_hub_validated, galaxy
+
+[galaxy_server.automation_hub_certified]
+url=https://console.redhat.com/api/automation-hub/content/published/
+auth_url=https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
+token=<token>
+
+[galaxy_server.automation_hub_validated]
+url=https://console.redhat.com/api/automation-hub/content/validated/
+auth_url=https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
+token=<token>
+
+[galaxy_server.galaxy]
+# Ansible Galaxy (community collections)
+url=https://galaxy.ansible.com/

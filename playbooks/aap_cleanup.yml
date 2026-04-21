@@ -1,0 +1,99 @@
+---
+# Description:
+#   Remove all AAP objects created by the AIOps demo.
+#   This playbook is DESTRUCTIVE -- it deletes the demo organization and
+#   all objects within it. A confirmation prompt prevents accidental runs.
+#
+# Run order: use this ONLY when tearing down the demo environment.
+#
+# Usage:
+#   ansible-playbook -e @vault.yml playbooks/aap_cleanup.yml --ask-vault-pass
+
+- name: Tear down AIOps demo AAP objects
+  hosts: local
+  connection: local
+  gather_facts: false
+  collections:
+    - ansible.controller
+    - ansible.builtin
+  tags: [casc, cleanup]
+
+  vars_prompt:
+    - name: confirm_cleanup
+      prompt: >-
+        This will DELETE all AIOps demo objects from AAP
+        (organization, templates, credentials, inventory, EE, EDA activation).
+        Type 'yes' to confirm
+      private: false
+
+  tasks:
+    - name: Abort if cleanup was not confirmed
+      ansible.builtin.assert:
+        that:
+          - confirm_cleanup == 'yes'
+        fail_msg: "Cleanup aborted. You must type 'yes' to proceed."
+      tags: [cleanup, confirm]
+
+    # Remove EDA activation first since it depends on the project
+    - name: Remove EDA rulebook activation
+      ansible.controller.rulebook_activation:
+        name: Prometheus Alert Monitor
+        organization: "{{ demo_organization_name }}"
+        state: absent
+      ignore_errors: true
+      tags: [cleanup, eda]
+
+    # Remove job templates before the project they reference
+    - name: Remove demo job templates
+      ansible.controller.job_template:
+        name: "{{ item }}"
+        organization: "{{ demo_organization_name }}"
+        state: absent
+      loop:
+        - AI Triage
+        - Restart Web Service
+        - Reclaim Disk Space
+      tags: [cleanup, templates]
+
+    - name: Remove demo project
+      ansible.controller.project:
+        name: "{{ demo_project_name }}"
+        organization: "{{ demo_organization_name }}"
+        state: absent
+      tags: [cleanup, project]
+
+    - name: Remove demo inventory
+      ansible.controller.inventory:
+        name: "{{ demo_inventory_name }}"
+        organization: "{{ demo_organization_name }}"
+        state: absent
+      tags: [cleanup, inventory]
+
+    - name: Remove demo credentials
+      ansible.controller.credential:
+        name: "{{ item }}"
+        organization: "{{ demo_organization_name }}"
+        state: absent
+      loop:
+        - "{{ machine_host_credential_name }}"
+        - "{{ demo_controller_token_name }}"
+      tags: [cleanup, credentials]
+
+    - name: Remove custom execution environment
+      ansible.controller.execution_environment:
+        name: AIOps Triage EE
+        organization: "{{ demo_organization_name }}"
+        state: absent
+      tags: [cleanup, ee]
+
+    # Organization is removed last since all objects reference it
+    - name: Remove demo organization
+      ansible.controller.organization:
+        name: "{{ demo_organization_name }}"
+        state: absent
+      tags: [cleanup, organization]
+
+    - name: Cleanup complete
+      ansible.builtin.debug:
+        msg: All AIOps demo objects have been removed from AAP.
+      tags: [cleanup]

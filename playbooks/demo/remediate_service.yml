@@ -1,0 +1,63 @@
+---
+# Description:
+#   Restart a failed system service (httpd) and verify recovery.
+#   This is the remediation template the LLM should select when a
+#   ServiceDown alert fires for httpd.
+#
+# Run order: triggered automatically by the AI Triage job template via MCP.
+#
+# Usage (manual):
+#   ansible-playbook -i inventory.yml playbooks/demo/remediate_service.yml \
+#     -e @vault.yml --ask-vault-pass
+
+- name: Restart httpd and verify service recovery
+  hosts: web_servers
+  become: true
+  gather_facts: false
+  collections:
+    - ansible.builtin
+    - ansible.posix
+  tags: [remediate, service]
+
+  handlers:
+    - name: Wait for httpd to accept connections
+      ansible.builtin.wait_for:
+        port: 80
+        host: "{{ ansible_host | default(inventory_hostname) }}"
+        delay: 2
+        timeout: 30
+      listen: httpd restarted
+
+  tasks:
+    - name: Restart the httpd service
+      ansible.builtin.service:
+        name: httpd
+        state: restarted
+        enabled: true
+      notify: httpd restarted
+      tags: [remediate, restart]
+
+    # Force handler execution so the port check runs immediately,
+    # not deferred to end-of-play.
+    - name: Flush handlers to verify port availability now
+      ansible.builtin.meta: flush_handlers
+      tags: [remediate, verify]
+
+    - name: Verify httpd health check endpoint responds with HTTP 200
+      ansible.builtin.uri:
+        url: "http://{{ ansible_host | default(inventory_hostname) }}/"
+        method: GET
+        return_content: false
+        status_code: 200
+      register: health_check
+      retries: 3
+      delay: 5
+      until: health_check.status == 200
+      tags: [remediate, verify]
+
+    - name: Report successful remediation
+      ansible.builtin.debug:
+        msg: >-
+          httpd has been restarted and is responding on port 80.
+          Health check status: {{ health_check.status }}
+      tags: [remediate, report]

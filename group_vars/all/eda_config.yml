@@ -1,0 +1,19 @@
+---
+# --- EDA projects ---
+eda_projects:
+  - name: "{{ demo_eda_project_name }}"
+    url: "{{ demo_project_scm_url }}"
+    description: EDA project for AIOps LLM-driven remediation demo
+    state: present
+
+# --- EDA rulebook activations ---
+# A single activation covers all Prometheus alerts; the LLM
+# inside the AI Triage job template decides what action to take.
+eda_rulebook_activations:
+  - name: Prometheus Alert Monitor
+    project: "{{ demo_eda_project_name }}"
+    rulebook: rulebooks/prometheus_alerts.yml
+    decision_environment: "{{ demo_decision_environment_name }}"
+    credential: "{{ demo_controller_token_name }}"
+    enabled: true
+    state: present

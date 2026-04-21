@@ -1,0 +1,52 @@
+---
+description: Baseline directory structure for AAP demo artifacts. Part of the artifact--* rule set.
+alwaysApply: true
+---
+
+# Directory layout (baseline)
+
+Adapt subfolders under `playbooks/`, `vars/`, `rulebooks/`, `templates/`, `files/` to the scenario, but keep this spine:
+
+```
+aap-demo-<slug>/
+├── ansible.cfg.example
+├── inventory.yml
+├── vault.yml.example
+├── README.md
+├── .gitignore
+├── .cursor/rules/
+│   ├── artifact--casc.mdc              # CasC standards (alwaysApply true)
+│   ├── artifact--layout.mdc            # directory layout (alwaysApply true)
+│   ├── artifact--ansible-quality.mdc   # Ansible/YAML quality (alwaysApply true)
+│   ├── artifact--roles.mdc             # role standards (alwaysApply true)
+│   ├── artifact--readme.mdc            # README style (alwaysApply true)
+│   ├── artifact--code-comments.mdc     # playbook/task/CasC comments (alwaysApply true)
+│   ├── artifact--checklist.mdc         # pre-handoff checklist (alwaysApply true)
+│   └── all--english-content.mdc        # English-only prose and comments (alwaysApply true)
+├── collections/
+│   └── requirements.yml
+├── group_vars/all/
+│   ├── demo_variables.yml.example
+│   ├── organizations.yml
+│   ├── projects.yml
+│   ├── credentials.yml
+│   ├── inventories.yml
+│   ├── job_templates.yml
+│   ├── workflow_templates.yml
+│   └── ...                            # further CasC files as needed
+├── vars/
+├── playbooks/
+│   ├── aap_config.yml
+│   ├── aap_cleanup.yml
+│   ├── site.yml                       # optional data-plane entry if needed
+│   ├── verify.yml                     # idempotency / smoke tests
+│   └── setup/                         # optional ordered setup (e.g. 01_..., 02_...)
+├── rulebooks/                         # only if EDA is in scope
+├── roles/                             # optional host automation
+├── docs/
+│   ├── setup.md
+│   ├── procedures.md
+│   └── verification.md
+├── templates/
+└── files/
+```

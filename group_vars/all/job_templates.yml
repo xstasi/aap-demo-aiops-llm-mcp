@@ -1,0 +1,50 @@
+---
+# --- AAP job templates ---
+controller_templates:
+  # AI Triage -- the LLM-powered dispatcher launched by EDA.
+  # Receives alert_payload as an extra var, calls the selected
+  # LLM backend's triage script, which discovers templates via MCP
+  # and launches the best match.
+  - name: AI Triage
+    organization: "{{ demo_organization_name }}"
+    inventory: "{{ demo_inventory_name }}"
+    project: "{{ demo_project_name }}"
+    playbook: playbooks/ai_triage.yml
+    execution_environment: AIOps Triage EE
+    credential: "{{ machine_host_credential_name }}"
+    ask_variables_on_launch: true
+    extra_vars:
+      triage_backend: "{{ triage_backend }}"
+      mcp_server_url: "{{ mcp_server_url }}"
+      mcp_auth_token: "{{ mcp_auth_token }}"
+      llm_api_url: "{{ llm_api_url }}"
+      llm_model: "{{ llm_model }}"
+      anthropic_api_key: "{{ anthropic_api_key | default('') }}"
+    state: present
+
+  # Remediation template: restart httpd and verify recovery.
+  # This is the template the LLM should select for ServiceDown alerts.
+  - name: Restart Web Service
+    organization: "{{ demo_organization_name }}"
+    inventory: "{{ demo_inventory_name }}"
+    project: "{{ demo_project_name }}"
+    playbook: playbooks/demo/remediate_service.yml
+    credential: "{{ machine_host_credential_name }}"
+    description: >-
+      Restart the httpd service on the target host and verify
+      that the health check endpoint responds on port 80.
+    state: present
+
+  # Decoy template: disk cleanup. The LLM should NOT select this
+  # for a ServiceDown alert, proving it reasons about the alert
+  # rather than picking arbitrarily.
+  - name: Reclaim Disk Space
+    organization: "{{ demo_organization_name }}"
+    inventory: "{{ demo_inventory_name }}"
+    project: "{{ demo_project_name }}"
+    playbook: playbooks/demo/remediate_disk.yml
+    credential: "{{ machine_host_credential_name }}"
+    description: >-
+      Free disk space by cleaning temporary files and rotating
+      logs on the target host. Use for DiskSpaceLow alerts.
+    state: present
