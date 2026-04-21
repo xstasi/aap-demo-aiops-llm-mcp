@@ -29,3 +29,4 @@ additional_build_steps:
 
   append_final:
     - RUN rm -f /etc/ansible/ansible.cfg
+    - COPY _build/files/ /opt/aiops/files/
