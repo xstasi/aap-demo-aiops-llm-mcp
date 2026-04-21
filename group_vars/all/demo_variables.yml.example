@@ -63,4 +63,4 @@ eda_validate_certs: false
 # --- EDA object names ---
 demo_eda_project_name: AIOps EDA Project
 demo_decision_environment_name: Default Decision Environment
-demo_controller_token_name: AIOps Controller Token
+demo_controller_credential_name: AIOps Controller Credential

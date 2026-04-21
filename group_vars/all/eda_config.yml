@@ -3,6 +3,7 @@
 eda_projects:
   - name: "{{ demo_eda_project_name }}"
     url: "{{ demo_project_scm_url }}"
+    organization: "{{ demo_organization_name }}"
     description: EDA project for AIOps LLM-driven remediation demo
     state: present
 
@@ -12,8 +13,10 @@ eda_projects:
 eda_rulebook_activations:
   - name: Prometheus Alert Monitor
     project: "{{ demo_eda_project_name }}"
-    rulebook: rulebooks/prometheus_alerts.yml
+    rulebook: prometheus_alerts.yml
     decision_environment: "{{ demo_decision_environment_name }}"
-    credential: "{{ demo_controller_token_name }}"
+    organization: "{{ demo_organization_name }}"
+    eda_credentials:
+      - "{{ demo_controller_credential_name }}"
     enabled: true
     state: present
