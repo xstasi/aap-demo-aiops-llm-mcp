@@ -9,11 +9,23 @@ images:
     name: "registry.redhat.io/ansible-automation-platform-25/ee-minimal-rhel9:latest"
 
 dependencies:
-  python:
-    - requirements.txt
-  galaxy:
-    - requirements.yml
+  python: requirements.txt
+  galaxy: requirements.yml
+
+additional_build_files:
+  - src: ../ansible.cfg
+    dest: configs
+  - src: ../files
+    dest: files
+
+options:
+  package_manager_path: /usr/bin/microdnf
 
 additional_build_steps:
+  prepend_galaxy:
+    # Inject the project-root ansible.cfg (with Automation Hub tokens)
+    # so ansible-galaxy can install certified/validated collections.
+    - COPY _build/configs/ansible.cfg /etc/ansible/ansible.cfg
+
   append_final:
-    - COPY files/ /opt/aiops/files/
+    - RUN rm -f /etc/ansible/ansible.cfg

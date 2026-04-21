@@ -18,15 +18,12 @@ set -euo pipefail
 IMAGE="${1:-aiops-triage-ee:latest}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-echo "==> Copying triage scripts into build context..."
-cp -r "${SCRIPT_DIR}/../files/" "${SCRIPT_DIR}/files/"
-
 echo "==> Building Execution Environment: ${IMAGE}..."
 ansible-builder build \
   --file "${SCRIPT_DIR}/execution-environment.yml" \
   --tag "${IMAGE}" \
   --container-runtime podman \
-  --verbosity 2
+  --verbosity 3
 
 echo "==> Cleaning up copied scripts..."
 rm -rf "${SCRIPT_DIR}/files/"
