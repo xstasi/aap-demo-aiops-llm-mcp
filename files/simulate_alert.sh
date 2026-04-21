@@ -54,7 +54,7 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
   -X POST \
   -H "Content-Type: application/json" \
   -d "${PAYLOAD}" \
-  "http://${EDA_HOST}:${EDA_PORT}")
+  "http://${EDA_HOST}:${EDA_PORT}/alerts")
 
 if [[ "${HTTP_CODE}" =~ ^2[0-9]{2}$ ]]; then
   echo "Alert sent successfully (HTTP ${HTTP_CODE})."

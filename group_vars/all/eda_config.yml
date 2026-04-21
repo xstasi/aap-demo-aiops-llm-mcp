@@ -18,5 +18,7 @@ eda_rulebook_activations:
     organization: "{{ demo_organization_name }}"
     eda_credentials:
       - "{{ demo_controller_credential_name }}"
+    restart_policy: always
+    extra_vars: "demo_organization_name: {{ demo_organization_name }}"
     enabled: true
     state: present

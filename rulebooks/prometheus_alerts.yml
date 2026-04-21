@@ -22,7 +22,7 @@
     # The full event payload is passed as alert_payload so the LLM
     # can analyze the alert labels, annotations, and severity.
     - name: Forward firing alert to AI triage
-      condition: event.status is defined and event.status == "firing"
+      condition: event.alert.status is defined and event.alert.status == "firing"
       action:
         run_job_template:
           name: AI Triage
@@ -32,7 +32,7 @@
               alert_payload: "{{ event }}"
 
     - name: Log resolved alerts
-      condition: event.status is defined and event.status == "resolved"
+      condition: event.alert.status is defined and event.alert.status == "resolved"
       action:
         debug:
-          msg: "Resolved: {{ event.labels.alertname | default('unknown') }}"
+          msg: "Resolved: {{ event.alert.labels.alertname | default('unknown') }}"
