@@ -65,7 +65,7 @@
           --llm-model '{{ llm_model }}'
       register: triage_result
       changed_when: triage_result.rc == 0
-      failed_when: triage_result.rc > 1
+      failed_when: triage_result.rc > 0
       when: triage_backend == 'ollama'
       tags: [triage, ollama]
 
@@ -79,7 +79,7 @@
           --api-key '{{ anthropic_api_key }}'
       register: triage_result
       changed_when: triage_result.rc == 0
-      failed_when: triage_result.rc > 1
+      failed_when: triage_result.rc > 0
       when: triage_backend == 'claude'
       tags: [triage, claude]
 
