@@ -33,7 +33,7 @@ MCP as an integration protocol between AI and existing automation tooling.
 | 2 | Build and push the custom EE | `cd context/ && ./build.sh` |
 | 3 | Verify AAP objects | `ansible-playbook -e @vault.yml playbooks/verify.yml` |
 | 4 | Enable EDA rulebook activation | EDA Controller UI |
-| 5 | Simulate a Prometheus alert | `./files/simulate_alert.sh eda.example.com` |
+| 5 | Simulate a Prometheus alert | `./files/simulate_alert.sh eda.example.com` (see [alert types](#simulating-alerts)) |
 | 6 | Observe AI Triage + Remediation | AAP Controller UI -- Jobs page |
 
 See [docs/procedures.md](docs/procedures.md) for the full step-by-step walkthrough.
@@ -211,7 +211,7 @@ ansible-playbook -e @vault.yml playbooks/verify.yml --ask-vault-pass
 | `rulebooks/prometheus_alerts.yml` | EDA rulebook (single generic rule) |
 | `files/ollama_mcp_triage.py` | Triage script -- Ollama backend |
 | `files/claude_mcp_triage.py` | Triage script -- Claude backend |
-| `files/simulate_alert.sh` | Alert simulation shell script |
+| `files/simulate_alert.sh` | Alert simulation script (`service_down`, `disk_full`, `custom` types) |
 | `files/requirements.txt` | Python dependencies for triage scripts |
 | `context/` | Custom EE build files (ansible-builder) |
 | `docs/` | Setup, procedures, and verification guides |
@@ -238,6 +238,48 @@ mapping is needed in the rulebook:
 rulebooks/prometheus_alerts.yml
   Source: ansible.eda.alertmanager (port 5000)
   Rule:   event.status == "firing" -> run_job_template: AI Triage
+```
+
+---
+
+## Simulating Alerts
+
+`files/simulate_alert.sh` supports three alert types. All arguments after
+`eda-host` are optional; defaults are shown in parentheses.
+
+```
+./files/simulate_alert.sh <eda-host> [port] [type] [target-host] [severity] [detail] [alert-name]
+```
+
+| Type | `detail` argument | Default `detail` | Generated `alertname` |
+|---|---|---|---|
+| `service_down` (default) | Service name | `httpd` | `ServiceDown` |
+| `disk_full` | Mount point | `/` | `DiskFull` |
+| `custom` | Free-text summary | `Custom alert fired` | `CustomAlert` (override via `alert-name`) |
+
+**Examples:**
+
+```bash
+# Default: ServiceDown for httpd
+./files/simulate_alert.sh eda.example.com
+
+# ServiceDown for nginx, warning severity
+./files/simulate_alert.sh eda.example.com 5000 service_down webserver1.example.com warning nginx
+
+# DiskFull on /var, critical
+./files/simulate_alert.sh eda.example.com 5000 disk_full dbserver.example.com critical /var
+
+# Custom alert with a specific alertname
+./files/simulate_alert.sh eda.example.com 5000 custom app1.example.com warning "Swap usage above 90%" HighSwap
+```
+
+The same alert types are available via the Ansible playbook wrapper:
+
+```bash
+ansible-playbook playbooks/demo/simulate_alert.yml \
+  -e eda_webhook_host=eda.example.com \
+  -e alert_type=disk_full \
+  -e alert_detail=/var
 ```
 
 ---

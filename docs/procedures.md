@@ -50,16 +50,31 @@ In the EDA Controller UI:
 From any host that can reach the EDA Controller's webhook port (5000):
 
 ```bash
-# Using the shell script
+# Minimal invocation: ServiceDown for httpd on webserver1.example.com
 ./files/simulate_alert.sh eda.example.com
 
-# Or using the Ansible playbook
+# Or using the Ansible playbook wrapper
 ansible-playbook playbooks/demo/simulate_alert.yml \
   -e eda_webhook_host=eda.example.com
 ```
 
-Both methods send an Alertmanager-compatible `ServiceDown` alert for
-`httpd` on `webserver1.example.com`.
+The script accepts three alert types via the third positional argument
+(`service_down` is the default):
+
+| Type | Description | Example |
+|---|---|---|
+| `service_down` | Service outage (`ServiceDown` alertname) | `./files/simulate_alert.sh eda.example.com 5000 service_down webserver1.example.com critical nginx` |
+| `disk_full` | Filesystem exhaustion (`DiskFull` alertname) | `./files/simulate_alert.sh eda.example.com 5000 disk_full dbserver.example.com critical /var` |
+| `custom` | Arbitrary alert with a free-text summary | `./files/simulate_alert.sh eda.example.com 5000 custom app1.example.com warning "Swap above 90%" HighSwap` |
+
+Full argument reference:
+
+```
+./files/simulate_alert.sh <eda-host> [port] [type] [target-host] [severity] [detail] [alert-name]
+```
+
+For the `custom` type, the optional seventh argument overrides the
+`alertname` label (default: `CustomAlert`).
 
 ## 6. Observe the remediation chain
 
@@ -92,18 +107,25 @@ After the alert fires, the following chain executes automatically:
 ## 7. Test the decoy template
 
 To prove the LLM reasons about the alert rather than picking arbitrarily,
-you can modify the alert to a different scenario. The **Reclaim Disk Space**
-template should NOT be selected for a `ServiceDown` alert.
-
-If you want to test disk alerts, modify `simulate_alert.sh` or the playbook:
+trigger a `DiskFull` alert. The **Reclaim Disk Space** template should be
+selected instead of **Restart Web Service**:
 
 ```bash
-./files/simulate_alert.sh eda.example.com 5000 disk webserver1.example.com warning
+./files/simulate_alert.sh eda.example.com 5000 disk_full webserver1.example.com warning /var
 ```
 
-Note: this will still send a `ServiceDown` alert with the service name set
-to `disk`. For a true disk alert, you would need to modify the alert payload
-to use a `DiskSpaceLow` alertname.
+This sends a proper `DiskFull` alertname with a `mountpoint` label. Observe
+the **AI Triage** job output and confirm:
+
+- `selected_template` is now `Reclaim Disk Space` (not `Restart Web Service`)
+- `reasoning` references the filesystem / disk usage context from the alert
+
+For the inverse check, re-run the default `ServiceDown` alert and confirm
+the LLM switches back to **Restart Web Service**:
+
+```bash
+./files/simulate_alert.sh eda.example.com
+```
 
 ## 8. Cleanup (optional)
 
