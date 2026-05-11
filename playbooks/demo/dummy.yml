@@ -1,0 +1,23 @@
+---
+# Description:
+#   Dummy playbook to simulate a generic action
+#
+# Run order: triggered automatically by the AI Triage job template via MCP
+#
+# Usage (manual):
+#   ansible-playbook -i inventory.yml playbooks/demo/dummy.yml \
+#     -e @vault.yml --ask-vault-pass
+
+- name: Dummy playbook to demonstrate a generic job
+  hosts: all
+  become: true
+  gather_facts: true
+  collections:
+    - ansible.builtin
+  tags: [remediate, generic]
+
+  tasks:
+    - name: Fix an imaginary error
+      ansible.builtin.ping:
+      tags: [remediate, generic]
+
