@@ -40,12 +40,6 @@
       when: old_tmp_files.files | length > 0
       tags: [remediate, cleanup]
 
-    - name: Force log rotation to free space
-      ansible.builtin.command:
-        cmd: logrotate --force /etc/logrotate.conf
-      changed_when: true
-      tags: [remediate, logrotate]
-
     - name: Report disk space after cleanup
       ansible.builtin.command:
         cmd: df -h /
